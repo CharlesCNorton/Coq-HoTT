@@ -98,16 +98,10 @@ Section AbSESPfiber.
   Context `{Univalence} {B A : AbGroup@{u}} (n : nat)
     (f : K(B, n.+2) ->* K(A, n.+3)).
 
-  (** [A] is the [n.+2]-nd homotopy group of [loops K(A, n.+3)]. *)
-  Local Definition grp_iso_a_pi_loops
-    : GroupIsomorphism A (Pi n.+2 (loops K(A, n.+3)))
-    := grp_iso_compose (groupiso_pi_loops n.+1 K(A, n.+3))
-         (equiv_g_pi_n_em A n.+2).
-
-  (** The inclusion, through the rotated fiber sequence [loops K(A,n+3) -> pfiber f -> K(B,n+2)]. *)
+  (** The inclusion, through the rotated fiber sequence [loops K(A,n+3) -> pfiber f -> K(B,n+2)] and the identification of [A] with [Pi n.+2 (loops K(A, n.+3))]. *)
   Definition abses_pfiber_incl : A $-> abgroup_pi n (pfiber f)
     := grp_homo_compose (fmap (Pi n.+2) (connecting_map (pfib f) f))
-         grp_iso_a_pi_loops.
+         (equiv_g_pi_n_loops_em A n.+1).
 
   (** The projection, induced by the fiber inclusion of [f]. *)
   Definition abses_pfiber_proj : abgroup_pi n (pfiber f) $-> B
@@ -125,7 +119,7 @@ Section AbSESPfiber.
 
   Local Instance isembedding_abses_pfiber_incl : IsEmbedding abses_pfiber_incl.
   Proof.
-    napply (istruncmap_compose (-1) grp_iso_a_pi_loops).
+    napply (istruncmap_compose (-1) (equiv_g_pi_n_loops_em A n.+1)).
     2: rapply istruncmap_mapinO_tr.
     exact (isembedding_fmap_pi_isexact (connecting_map (pfib f) f) (pfib f)
              n.+1).
@@ -142,10 +136,12 @@ Section AbSESPfiber.
   Local Instance isexact_abses_pfiber
     : IsExact (Tr (-1)) abses_pfiber_incl abses_pfiber_proj.
   Proof.
-    napply (isexact_square_if _
-      grp_iso_a_pi_loops pequiv_pmap_idmap (equiv_g_pi_n_em B n.+1)).
+    napply (isexact_square_if _ (equiv_g_pi_n_loops_em A n.+1)
+      pequiv_pmap_idmap (equiv_g_pi_n_em B n.+1)).
     3: exact (isexact_pi_total (connecting_map (pfib f) f) (pfib f) n.+2).
-    1: srapply phomotopy_homotopy_hset; intro x; reflexivity.
+    (* The first square commutes by definition.  We give the term, since [reflexivity] is very slow here. *)
+    1: srapply phomotopy_homotopy_hset; intro x;
+         exact (idpath (abses_pfiber_incl x)).
     srapply phomotopy_homotopy_hset; intro x.
     exact (eisretr (equiv_g_pi_n_em B n.+1) _).
   Defined.
@@ -198,7 +194,6 @@ Section PfiberDeloop.
     lhs napply (eissect (equiv_g_pi_n_em (abgroup_pi 1 (pfiber psi)) 2)).
     rhs tapply (fmap_comp (Pi 3)).
     refine (ap (fmap (Pi 3) (connecting_map (pfib psi) psi)) _).
-    lhs napply (eisretr (groupiso_pi_loops 2 K(A, 4))).
     tapply (ap _ (eisretr (equiv_g_pi_n_em A 2) x)).
   Qed.
 
@@ -336,7 +331,7 @@ Section ClassifyingRoundTrip.
   (** The middle isomorphism of the round trip. *)
   Local Definition grp_iso_pi_pfiber_classifying_map
     : GroupIsomorphism (abgroup_pi 0 (pfiber (abses_classifying_map E))) E
-    := grp_iso_compose (grp_iso_inverse (grp_iso_a_pi_loops 0))
+    := grp_iso_compose (grp_iso_inverse (equiv_g_pi_n_loops_em E 1))
          (groupiso_pi_functor 1 pequiv_pfiber_classifying_map).
 
   (** It commutes with the inclusions. *)
@@ -349,12 +344,9 @@ Section ClassifyingRoundTrip.
     lhs_V exact (fmap_comp (Pi 2)
       (connecting_map (pfib (abses_classifying_map E))
         (abses_classifying_map E))
-      pequiv_pfiber_classifying_map
-      (groupiso_pi_loops 1 K(A, 3) (equiv_g_pi_n_em A 2 a))).
+      pequiv_pfiber_classifying_map (equiv_g_pi_n_loops_em A 1 a)).
     lhs tapply (fmap2 (Pi 2) connecting_map_classifying_map).
-    lhs_V exact (fmap_pi_loops 2 (fmap (K' 3) (inclusion E))
-      (equiv_g_pi_n_em A 2 a)).
-    exact (ap (pi_loops 2 K(E, 3)) (pi_em_fmap (inclusion E) 2 a)).
+    napply pi_loops_em_fmap.
   Qed.
 
   (** It commutes with the projections. *)
@@ -369,16 +361,10 @@ Section ClassifyingRoundTrip.
     lhs_V tapply (fmap_comp (Pi 2)).
     lhs tapply (fmap2 (Pi 2) square_pfib_classifying_map).
     lhs tapply (fmap_comp (Pi 2)).
-    (* Change the left side into the right, via naturality of [pi_loops] and [pi_em_fmap]. *)
-    lhs_V exact (ap (fmap (pPi 2) (fmap loops (fmap (K' 3) (projection E))))
-                   (eisretr (groupiso_pi_loops 1 K(E, 3))
-                      (fmap (Pi 2) pequiv_pfiber_classifying_map x))).
-    lhs_V tapply (fmap_pi_loops 2 (fmap (K' 3) (projection E))).
-    lhs rapply (ap (groupiso_pi_loops 1 K(B, 3))).
-    { lhs_V tapply (ap (fmap (Pi 3) (fmap (K' 3) (projection E)))
-                      (eisretr (equiv_g_pi_n_em E 2) _)).
-      apply pi_em_fmap. }
-    napply eisretr.
+    (* The right side, by naturality of [equiv_g_pi_n_loops_em]. *)
+    rhs_V napply (pi_loops_em_fmap (projection E) 1).
+    tapply (ap (fmap (Pi 2) (fmap loops (fmap (K' 3) (projection E))))).
+    symmetry; napply eisretr.
   Qed.
 
   (** The first round trip: the short exact sequence extracted from the classifying map of [E] is [E]. *)

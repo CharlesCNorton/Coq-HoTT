@@ -325,6 +325,25 @@ Section EilenbergMacLane.
     symmetry; apply pi_em_fmap'.
   Defined.
 
+  (** [G] is also the [n.+1]-st homotopy group of [loops K(G, n.+2)], through the loop identification [pequiv_loops_em_em].  Composing with the inverse of [groupiso_pi_loops] gives [equiv_g_pi_n_em G n.+1]. *)
+  Definition equiv_g_pi_n_loops_em (G : AbGroup) (n : nat)
+    : GroupIsomorphism G (Pi n.+1 (loops K(G, n.+2)))
+    := grp_iso_compose (groupiso_pi_functor n (pequiv_loops_em_em G n.+1))
+         (equiv_g_pi_n_em G n).
+
+  (** This identification is natural, since [pequiv_loops_em_em] and [equiv_g_pi_n_em] are. *)
+  Definition pi_loops_em_fmap {G G' : AbGroup}
+    (f : GroupHomomorphism G G') (n : nat)
+    : fmap (Pi n.+1) (fmap loops (fmap (K' n.+2) f)) o equiv_g_pi_n_loops_em G n
+      == equiv_g_pi_n_loops_em G' n o f.
+  Proof.
+    intro g.
+    lhs_V tapply (fmap_comp (Pi n.+1)).
+    lhs tapply (fmap2 (Pi n.+1) (em_fmap_loops_natural f n.+1)).
+    lhs tapply (fmap_comp (Pi n.+1)).
+    exact (ap _ (pi_em_fmap f n g)).
+  Defined.
+
   (** Eilenberg-Mac Lane spaces of a contractible group are contractible. *)
   #[export] Instance contr_em_contr {G : Group} `{Contr G} (n : nat)
     : Contr K(G, n).
