@@ -136,8 +136,7 @@ Section AbSESPfiber.
   Proof.
     napply conn_map_compose.
     2: rapply conn_map_isequiv.
-    exact (isconnmap_O_isexact_base_contr _ _ _
-             (H := isexact_pi_total (pfib f) f n.+2)).
+    exact (issurj_fmap_pi_isexact (pfib f) f n.+2).
   Defined.
 
   Local Instance isexact_abses_pfiber

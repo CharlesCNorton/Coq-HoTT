@@ -501,6 +501,12 @@ Section PiLES.
     : IsEmbedding (fmap (pPi n.+1) i)
     := isembedding_isexact (A := pPi n.+2 Y) (isexact_pi_fiber n.+1).
 
+  (** When [Pi n Y] is trivial, exactness at [Pi n X] says that [fmap (Pi n) i] is a surjection. *)
+  Definition issurj_fmap_pi_isexact (n : nat) {c : Contr (Pi n Y)}
+    : IsSurjection (fmap (pPi n) i)
+    := isconnmap_O_isexact_base_contr (Tr (-1)) _ (fmap (pPi n) f)
+         (H := isexact_pi_total n).
+
 End PiLES.
 
 (** [F], [X] and [Y] cannot be inferred from the index, so we make them explicit, as they are in [loops_carrier]. *)
