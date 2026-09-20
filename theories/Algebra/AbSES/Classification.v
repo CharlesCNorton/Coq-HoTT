@@ -8,7 +8,7 @@ Require Import Spaces.Nat.Core.
 Require Import Universes.Smallness.
 Require Import Homotopy.HomotopyGroup Homotopy.EMSpace Homotopy.ExactSequence.
 Require Import Homotopy.WhiteheadsPrinciple.
-Require Import Groups.Group Groups.ShortExactSequence.
+Require Import Groups.Group.
 Require Import Equiv.BiInv.
 Require Import Modalities.Identity Modalities.Descent.
 Require Import Modalities.ReflectiveSubuniverse.
@@ -50,34 +50,12 @@ Section EMFiberSequence.
         (fmap (pPi n.+1) (pfib (fmap (K' n.+1) (projection E))))
     := isembedding_fmap_pi_isexact _ _ n (c := contr_pi_istrunc n.+1 _).
 
-  (** Both [Pi n.+1 K(A, n.+1)] and [Pi n.+1] of the fiber are the kernel of [Pi n.+1] of the projection, so the comparison map identifies them. *)
-  Local Instance isequiv_pi_cxfib
-    : IsEquiv (fmap (Pi n.+1) (cxfib (iscomplex_em_abses n.+1))).
-  Proof.
-    napply isequiv_isexact_factor.
-    - intro x.
-      exact ((fmap_comp (Pi n.+1) (cxfib (iscomplex_em_abses n.+1))
-                (pfib (fmap (K' n.+1) (projection E))) x)^
-             @ fmap2 (Pi n.+1) (pfib_cxfib _) x).
-    - exact _.
-    - exact isembedding_pi_pfib_em.
-    - exact isexact_pi_em_abses.
-    - exact (isexact_pi_total _ _ n.+1).
-  Defined.
-
-  (** Both sides are [n]-connected and [n.+1]-truncated, so the comparison map is an equivalence by Whitehead's principle. *)
-  Local Instance isequiv_cxfib_em
-    : IsEquiv (cxfib (iscomplex_em_abses n.+1))
-    := isequiv_isconnected_istrunc_isequiv_pi n.+1 _.
-
-  (** [K(-, n.+1)] sends short exact sequences of abelian groups to fiber sequences of Eilenberg-Mac Lane spaces. *)
+  (** [K(-, n.+1)] sends short exact sequences of abelian groups to fiber sequences of Eilenberg-Mac Lane spaces.  The hypotheses of [isexact_purely_isexact_pi] are found by typeclass search: the spaces are [n]-connected and [n.+1]-truncated, [fmap (K' n.+1)] of the projection is [n]-connected since the projection is surjective, and [fmap (K' n.+1)] of the inclusion is an embedding on [Pi n.+1] since the inclusion is an embedding. *)
   #[export] Instance isexact_em_abses
     : IsExact purely (fmap (K' n.+1) (inclusion E))
-        (fmap (K' n.+1) (projection E)).
-  Proof.
-    exists (iscomplex_em_abses n.+1).
-    rapply conn_map_isequiv.
-  Defined.
+        (fmap (K' n.+1) (projection E))
+    := isexact_purely_isexact_pi n (iscomplex_em_abses n.+1)
+         isexact_pi_em_abses.
 
 End EMFiberSequence.
 
