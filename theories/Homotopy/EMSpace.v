@@ -8,9 +8,9 @@ Require Import Homotopy.Suspension.
 Require Import Homotopy.ClassifyingSpace.Core.
 Import ClassifyingSpaceNotation.
 Require Import Homotopy.HSpace.Coherent.
-Require Import Homotopy.HomotopyGroup.
+Require Import Homotopy.HomotopyGroup Homotopy.ExactSequence.
 Require Import Homotopy.Hopf.
-Require Import Modalities.Descent.
+Require Import Modalities.Identity Modalities.Descent.
 Require Import Truncations.Core Truncations.Connectedness Truncations.SeparatedTrunc.
 
 (** * Eilenberg-Mac Lane spaces *)
@@ -84,6 +84,28 @@ Proof.
   lhs_V tapply (fmap_comp (Pi n.+1)).
   rhs_V tapply (fmap_comp (Pi n.+1)).
   exact (fmap2 (Pi n.+1) p x).
+Defined.
+
+(** Two commuting squares between purely exact sequences form a map of fiber sequences, in the sense needed by [connecting_map_natural_isexact], whenever [F'] is [n]-connected and [X] and [Y] are [n.+1]-truncated.  The two sides agree after composing with [pfib f], which is an embedding on [Pi n.+1]. *)
+Definition phomotopy_functor_pfiber_cxfib `{Univalence} (n : nat)
+  {F X Y F' X' Y' : pType}
+  {i : F ->* X} {f : X ->* Y} `{IsExact purely F X Y i f}
+  {i' : F' ->* X'} {f' : X' ->* Y'} `{IsExact purely F' X' Y' i' f'}
+  {g : F' ->* F} {h : X' ->* X} {k : Y' ->* Y}
+  `{IsConnected n F'} `{IsTrunc n.+1 X} `{IsTrunc n.+1 Y}
+  (p : h o* i' ==* i o* g) (q : k o* f' ==* f o* h)
+  : functor_pfiber q o* pequiv_cxfib ==* pequiv_cxfib o* g.
+Proof.
+  rapply (phomotopy_pmap_isembedding_pi n (pfib f)
+            (isembedding_fmap_pi_isexact _ _ n
+               (c := contr_pi_istrunc n.+1 _))).
+  lhs_V' napply pmap_compose_assoc.
+  lhs_V' napply (pmap_prewhisker _ (square_functor_pfiber q)).
+  lhs' napply pmap_compose_assoc.
+  lhs' napply (pmap_postwhisker _ (pfib_cxfib _)).
+  rhs_V' napply pmap_compose_assoc.
+  rhs' napply (pmap_prewhisker _ (pfib_cxfib _)).
+  exact p.
 Defined.
 
 (** Two [n]-connected [n.+1]-truncated pointed types with isomorphic [Pi n.+1] are pointed equivalent. *)
