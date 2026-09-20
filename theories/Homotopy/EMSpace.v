@@ -315,6 +315,16 @@ Section EilenbergMacLane.
       == equiv_g_pi_n_em G' n o f o (equiv_g_pi_n_em G n)^-1
     := cate_moveL_eV (A:=Group) _ _ (equiv_g_pi_n_em G' n $o f) (pi_em_fmap f n).
 
+  (** It follows that [fmap (Pi n.+1) (fmap (K' n.+1) f)] is an embedding when [f] is. *)
+  #[export] Instance isembedding_pi_em_fmap {G G' : AbGroup}
+    (f : GroupHomomorphism G G') `{!IsEmbedding f} (n : nat)
+    : IsEmbedding (fmap (Pi n.+1) (fmap (K' n.+1) f)).
+  Proof.
+    rapply (mapinO_homotopic (Tr (-1))
+              (equiv_g_pi_n_em G' n o f o (equiv_g_pi_n_em G n)^-1)).
+    symmetry; apply pi_em_fmap'.
+  Defined.
+
   (** Eilenberg-Mac Lane spaces of a contractible group are contractible. *)
   #[export] Instance contr_em_contr {G : Group} `{Contr G} (n : nat)
     : Contr K(G, n).

@@ -9,7 +9,6 @@ Require Import Universes.Smallness.
 Require Import Homotopy.HomotopyGroup Homotopy.EMSpace Homotopy.ExactSequence.
 Require Import Homotopy.WhiteheadsPrinciple.
 Require Import Groups.Group Groups.ShortExactSequence.
-Require Import HSet.
 Require Import Equiv.BiInv.
 Require Import Modalities.Identity Modalities.Descent.
 Require Import Modalities.ReflectiveSubuniverse.
@@ -60,15 +59,7 @@ Section EMFiberSequence.
       exact ((fmap_comp (Pi n.+1) (cxfib (iscomplex_em_abses n.+1))
                 (pfib (fmap (K' n.+1) (projection E))) x)^
              @ fmap2 (Pi n.+1) (pfib_cxfib _) x).
-    - (* [Pi n.+1] of [K(-, n.+1)] of the inclusion is conjugate to the inclusion. *)
-      apply isembedding_isinj_hset.
-      intros x y q.
-      apply (equiv_inj (equiv_g_pi_n_em A n)^-1%equiv).
-      rapply (isinj_embedding (inclusion E)).
-      apply (equiv_inj (equiv_g_pi_n_em E n)).
-      lhs_V napply (pi_em_fmap' (inclusion E) n x).
-      rhs_V napply (pi_em_fmap' (inclusion E) n y).
-      exact q.
+    - exact _.
     - exact isembedding_pi_pfib_em.
     - exact isexact_pi_em_abses.
     - exact (isexact_pi_total _ _ n.+1).
