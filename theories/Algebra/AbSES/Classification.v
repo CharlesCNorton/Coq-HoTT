@@ -1,4 +1,4 @@
-From HoTT Require Import Basics Types Truncations.Core
+From HoTT Require Import Basics Types HFiber Truncations.Core
   Truncations.SeparatedTrunc.
 From HoTT.WildCat Require Import Core NatTrans PointedCat.
 Require Import Pointed.
@@ -48,12 +48,8 @@ Section EMFiberSequence.
   (** The fiber inclusion of [K(-, n.+1)] of the projection is an embedding on [Pi n.+1], since the homotopy group mapping into it vanishes. *)
   Local Definition isembedding_pi_pfib_em
     : IsEmbedding
-        (fmap (pPi n.+1) (pfib (fmap (K' n.+1) (projection E)))).
-  Proof.
-    napply (isembedding_isexact (A := pPi n.+2 K(B, n.+1))).
-    1: rapply contr_pi_istrunc.
-    rapply isexact_pi_fiber.
-  Defined.
+        (fmap (pPi n.+1) (pfib (fmap (K' n.+1) (projection E))))
+    := isembedding_fmap_pi_isexact _ _ n (c := contr_pi_istrunc n.+1 _).
 
   (** Both [Pi n.+1 K(A, n.+1)] and [Pi n.+1] of the fiber are the kernel of [Pi n.+1] of the projection, so the comparison map identifies them. *)
   Local Instance isequiv_pi_cxfib
@@ -138,14 +134,10 @@ Section AbSESPfiber.
 
   Local Instance isembedding_abses_pfiber_incl : IsEmbedding abses_pfiber_incl.
   Proof.
-    assert (emb : IsEmbedding (fmap (pPi n.+2) (connecting_map (pfib f) f))).
-    { napply (isembedding_isexact (A := pPi n.+3 K(B, n.+2))).
-      1: exact _.
-      exact (isexact_pi_fiber (connecting_map (pfib f) f) (pfib f) n.+2). }
-    apply isembedding_isinj_hset.
-    intros x y q.
-    apply (equiv_inj grp_iso_a_pi_loops).
-    exact (isinj_embedding _ emb _ _ q).
+    napply (istruncmap_compose (-1) grp_iso_a_pi_loops).
+    2: rapply istruncmap_mapinO_tr.
+    exact (isembedding_fmap_pi_isexact (connecting_map (pfib f) f) (pfib f)
+             n.+1).
   Defined.
 
   Local Instance issurjection_abses_pfiber_proj
@@ -228,12 +220,8 @@ Section PfiberDeloop.
 
   (** [Pi 3] of the fiber inclusion of [pfib psi] is an embedding, since the homotopy group mapping into it vanishes. *)
   Local Definition isembedding_pi_pfib_pfib
-    : IsEmbedding (fmap (pPi 3) (pfib (pfib psi))).
-  Proof.
-    napply (isembedding_isexact (A := pPi 4 K(B, 3))).
-    1: rapply contr_pi_istrunc.
-    rapply isexact_pi_fiber.
-  Defined.
+    : IsEmbedding (fmap (pPi 3) (pfib (pfib psi)))
+    := isembedding_fmap_pi_isexact _ _ 2 (c := contr_pi_istrunc 3 _).
 
   (** The identifications above form a map from the fiber sequence of Eilenberg-Mac Lane spaces of the extracted sequence to the fiber sequence of [pfib psi]: on fibers, the map induced by [square_em_proj_pfib] corresponds to the inverse of [pfiber2_loops psi], modulo the loop identification of [K(A,3)]. *)
   Local Definition phomotopy_cxfib_pfiber2_loops

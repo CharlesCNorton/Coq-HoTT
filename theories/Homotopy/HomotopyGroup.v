@@ -3,6 +3,7 @@ Require Import Modalities.Modality Modalities.Identity.
 Require Import Truncations.Core Truncations.SeparatedTrunc
   Truncations.Connectedness.
 Require Import Algebra.AbGroups.AbelianGroup.
+Require Import Algebra.Groups.ShortExactSequence.
 Require Import Spaces.Finite.Tactics Spaces.Nat.Core.
 Require Import Homotopy.SuccessorStructure Homotopy.ExactSequence.
 From HoTT.WildCat Require Import Core Universe Equiv.
@@ -494,6 +495,11 @@ Section PiLES.
   Definition isexact_pi_base (n : nat)
     : IsExact (Tr (-1)) (fmap (pPi n.+1) f) (pi_connecting_map n)
     := les_isexact _ _ Pi_les (n, inr tt).
+
+  (** When [Pi n.+2 Y] is trivial, exactness at [Pi n.+1 F] says that [fmap (Pi n.+1) i] is an embedding. *)
+  Definition isembedding_fmap_pi_isexact (n : nat) {c : Contr (Pi n.+2 Y)}
+    : IsEmbedding (fmap (pPi n.+1) i)
+    := isembedding_isexact (A := pPi n.+2 Y) (isexact_pi_fiber n.+1).
 
 End PiLES.
 
