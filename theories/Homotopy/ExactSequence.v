@@ -1,7 +1,7 @@
 From HoTT Require Import Basics Types.
 Require Import SuccessorStructure.
 Require Import Spaces.Finite.Tactics.
-From HoTT.WildCat Require Import Core PointedCat Square Equiv Universe.
+From HoTT.WildCat Require Import Core NatTrans PointedCat Square Equiv Universe.
 From HoTT.Pointed Require Import Core pMap pEquiv pFiber pTrunc Loops.
 Require Import Modalities.Identity Modalities.Descent.
 Require Import Truncations.
@@ -559,6 +559,18 @@ Definition connecting_map_natural {X Y X' Y' : pType}
     ==* connecting_map (pfib f) f o* fmap loops k
   := connecting_map_natural_functor q.
 
+(** When the square lies over the identity map, the [fmap loops] factor can be dropped. *)
+Definition connecting_map_natural_idmap {X X' Y : pType}
+  {f : X ->* Y} {f' : X' ->* Y} {h : X' ->* X}
+  (q : pmap_idmap o* f' ==* f o* h)
+  : functor_pfiber q o* connecting_map (pfib f') f'
+    ==* connecting_map (pfib f) f.
+Proof.
+  lhs' napply (connecting_map_natural_functor q).
+  lhs' tapply (pmap_postwhisker _ (fmap_id loops _)).
+  napply pmap_precompose_idmap.
+Defined.
+
 (** Through [cxfib], the connecting map of an exact sequence agrees with the connecting map of the tautological fiber sequence. *)
 Definition connecting_map_cxfib {F X Y : pType}
   (i : F ->* X) (f : X ->* Y) `{IsExact purely F X Y i f}
@@ -664,6 +676,25 @@ Proof.
   lhs' napply pmap_compose_assoc.
   napply pmap_postwhisker.
   apply pmap_compose_assoc.
+Defined.
+
+(** Through the same identification, the connecting map of the fiber sequence of the connecting map is [loops] of [i]. *)
+Definition connecting_map_pfib_connecting_map {F X Y : pType}
+  (i : F ->* X) (f : X ->* Y) `{IsExact purely F X Y i f}
+  : (loops_inv X o* (pfiber2_loops i o* pequiv_pfiber_connecting_map i f))
+    o* connecting_map (pfib (connecting_map i f)) (connecting_map i f)
+    ==* fmap loops i.
+Proof.
+  lhs' napply pmap_compose_assoc.
+  lhs' napply (pmap_postwhisker _ (pmap_compose_assoc _ _ _)).
+  lhs' napply (pmap_postwhisker _ (pmap_postwhisker _
+                 (connecting_map_natural_idmap _))).
+  lhs' napply (pmap_postwhisker _ (connecting_map_pfib2 i)).
+  lhs' exact (pmap_postwhisker _
+                (isnat_tr (F:=loops) (G:=loops) loops_inv i)).
+  lhs_V' napply pmap_compose_assoc.
+  lhs' napply (pmap_prewhisker _ (loops_inv_inv _)).
+  napply pmap_postcompose_idmap.
 Defined.
 
 (** ** Long exact sequences *)

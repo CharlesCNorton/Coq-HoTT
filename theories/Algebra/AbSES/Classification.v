@@ -1,6 +1,6 @@
 From HoTT Require Import Basics Types HFiber Truncations.Core
   Truncations.SeparatedTrunc.
-From HoTT.WildCat Require Import Core NatTrans PointedCat.
+From HoTT.WildCat Require Import Core PointedCat.
 Require Import Pointed.
 Require Import AbelianGroup.
 Require Import AbSES.Core AbSES.Ext.
@@ -299,14 +299,15 @@ Section ClassifyingRoundTrip.
           o* pequiv_loops_em_em B 2
     := pmap_postcompose_idmap _.
 
-  (** The fiber of the classifying map is [loops K(E,3)]. *)
+  (** The fiber of the classifying map is [loops K(E,3)]: it is the fiber of the connecting map, which [pfib_connecting_map] identifies with the loop space of the total space. *)
   Local Definition pequiv_pfiber_classifying_map
     : pfiber (abses_classifying_map E) <~>* loops K(E, 3)
-    := loops_inv _
-       o*E (pfiber2_loops (fmap (K' 3) (inclusion E))
-       o*E (pequiv_pfiber_connecting_map _ _
-           o*E pequiv_pfiber (pequiv_loops_em_em B 2) pequiv_pmap_idmap
-                square_classifying_map)).
+    := (loops_inv _
+        o*E (pfiber2_loops (fmap (K' 3) (inclusion E))
+        o*E pequiv_pfiber_connecting_map (fmap (K' 3) (inclusion E))
+              (fmap (K' 3) (projection E))))
+       o*E pequiv_pfiber (pequiv_loops_em_em B 2) pequiv_pmap_idmap
+             square_classifying_map.
 
   (** Through this identification, the fiber inclusion of the classifying map is [loops] of the projection. *)
   Local Definition square_pfib_classifying_map
@@ -316,11 +317,7 @@ Section ClassifyingRoundTrip.
   Proof.
     lhs' napply (square_pequiv_pfiber _ _ square_classifying_map).
     lhs' napply (pmap_prewhisker _ (pfib_connecting_map _ _)).
-    lhs' napply pmap_compose_assoc.
-    napply pmap_postwhisker.
-    lhs' napply pmap_compose_assoc.
-    napply pmap_postwhisker.
-    exact (pmap_compose_assoc _ _ _).
+    napply pmap_compose_assoc.
   Qed.
 
   (** Through the same identification, the connecting map of the fiber sequence of the classifying map is [loops] of the inclusion. *)
@@ -331,25 +328,9 @@ Section ClassifyingRoundTrip.
       ==* fmap loops (fmap (K' 3) (inclusion E)).
   Proof.
     lhs' napply pmap_compose_assoc.
-    lhs' napply (pmap_postwhisker _ (pmap_compose_assoc _ _ _)).
     lhs' napply (pmap_postwhisker _
-      (pmap_postwhisker _ (pmap_compose_assoc _ _ _))).
-    lhs' exact (pmap_postwhisker _ (pmap_postwhisker _ (pmap_postwhisker _
-      (connecting_map_natural _ _ square_classifying_map
-       @* (pmap_postwhisker _ (fmap_id loops _)
-           @* pmap_precompose_idmap _))))).
-    lhs' exact (pmap_postwhisker _ (pmap_postwhisker _
-      (connecting_map_natural _ _ _))).
-    lhs' exact (pmap_postwhisker _ (pmap_postwhisker _
-      (pmap_postwhisker _ (fmap_id loops _)
-       @* pmap_precompose_idmap _))).
-    lhs' napply (pmap_postwhisker _ (connecting_map_pfib2 _)).
-    lhs' exact (pmap_postwhisker _
-      (isnat_tr (F:=loops) (G:=loops) loops_inv
-        (fmap (K' 3) (inclusion E)))).
-    lhs_V' napply pmap_compose_assoc.
-    lhs' napply (pmap_prewhisker _ (loops_inv_inv _)).
-    napply pmap_postcompose_idmap.
+      (connecting_map_natural_idmap square_classifying_map)).
+    napply connecting_map_pfib_connecting_map.
   Qed.
 
   (** The middle isomorphism of the round trip. *)
