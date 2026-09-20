@@ -518,6 +518,16 @@ Proof.
   - reflexivity.
 Defined.
 
+(** It follows that the connecting map of the tautological fiber sequence is the inverse of [pfiber2_loops] followed by the fiber inclusion. *)
+Definition connecting_map_pfib {X Y : pType} (f : X ->* Y)
+  : connecting_map (pfib f) f ==* pfib (pfib f) o* (pfiber2_loops f)^-1*.
+Proof.
+  napply pmap_postwhisker.
+  tapply (cate_inv2 (A:=pType)).
+  exact (pmap_postwhisker _ (pequiv_pfiber_cxfib_taut f)
+         @* pmap_precompose_idmap _).
+Defined.
+
 (** TODO: The next two results are proved for the tautological fiber sequence.  It would be nice to extend them to any [FiberSeq] or equivalently any purely-exact sequence. *)
 
 (** The connecting map of the tautological fiber sequence is natural in arbitrary squares of pointed maps. *)
@@ -527,7 +537,8 @@ Definition connecting_map_natural_functor {X Y X' Y' : pType}
   : functor_pfiber q o* connecting_map (pfib f') f'
     ==* connecting_map (pfib f) f o* fmap loops k.
 Proof.
-  unfold connecting_map, i_fiberseq, connect_fiberseq, ".1", ".2".
+  lhs' napply (pmap_postwhisker _ (connecting_map_pfib f')).
+  rhs' napply (pmap_prewhisker _ (connecting_map_pfib f)).
   lhs_V' napply pmap_compose_assoc.
   lhs' napply (pmap_prewhisker _
                  (square_functor_pfiber (square_functor_pfiber q))).
@@ -536,13 +547,7 @@ Proof.
   napply pmap_postwhisker.
   napply moveL_pequiv_Vf.
   lhs_V' napply pmap_compose_assoc.
-  rapply moveR_pequiv_fV.
-  lhs' napply (pmap_prewhisker _
-                 (pmap_postwhisker _ (pequiv_pfiber_cxfib_taut f)
-                    @* pmap_precompose_idmap _)).
-  rhs' napply (pmap_postwhisker _
-                 (pmap_postwhisker _ (pequiv_pfiber_cxfib_taut f')
-                    @* pmap_precompose_idmap _)).
+  napply moveR_pequiv_fV.
   exact (pfiber2_loops_natural_functor q).
 Defined.
 
@@ -559,7 +564,7 @@ Definition connecting_map_cxfib {F X Y : pType}
   (i : F ->* X) (f : X ->* Y) `{IsExact purely F X Y i f}
   : pequiv_cxfib o* connecting_map i f ==* connecting_map (pfib f) f.
 Proof.
-  unfold connecting_map, i_fiberseq, connect_fiberseq, ".1", ".2".
+  rhs' napply connecting_map_pfib.
   lhs_V' napply pmap_compose_assoc.
   lhs' napply (pmap_prewhisker _
                  (square_pequiv_pfiber _ _ (square_pfib_pequiv_cxfib i f))).
@@ -567,10 +572,7 @@ Proof.
   napply pmap_postwhisker.
   napply moveR_pequiv_fV.
   napply moveL_pequiv_Vf.
-  lhs' napply pmap_compose_assoc.
-  napply pmap_postwhisker.
-  lhs' napply (pmap_prewhisker _ (pequiv_pfiber_cxfib_taut f)).
-  napply pmap_postcompose_idmap.
+  reflexivity.
 Defined.
 
 (** Through [pfiber2_loops], the connecting map of the doubly-iterated tautological fiber sequence is loop inversion followed by [loops] of the map. *)
@@ -578,15 +580,11 @@ Definition connecting_map_pfib2 {F X : pType} (i : F ->* X)
   : pfiber2_loops i o* connecting_map (pfib (pfib i)) (pfib i)
     ==* fmap loops i o* loops_inv F.
 Proof.
-  unfold connecting_map, i_fiberseq, connect_fiberseq, ".1", ".2".
+  lhs' napply (pmap_postwhisker _ (connecting_map_pfib _)).
   lhs_V' napply pmap_compose_assoc.
   napply moveR_pequiv_fV.
   lhs' napply (pfiber2_fmap_loops i).
-  rhs' napply pmap_compose_assoc.
-  napply pmap_postwhisker.
-  napply pmap_postwhisker.
-  napply (pmap_postwhisker _ (pequiv_pfiber_cxfib_taut (pfib i))
-          @* pmap_precompose_idmap _)^*.
+  exact (pmap_compose_assoc _ _ _)^*.
 Defined.
 
 (** Through [pfiber2_loops], the double fiber projection of an exact sequence is loop inversion followed by [loops] of the projection. *)

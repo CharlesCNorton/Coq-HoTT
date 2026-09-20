@@ -235,15 +235,15 @@ Section PfiberDeloop.
     rapply isexact_pi_fiber.
   Defined.
 
-  (** Through that identification, [cxfib] of the extracted sequence is the connecting identification of [psi], modulo the loop identification of [K(A,3)]. *)
-  Local Definition phomotopy_cxfib_connect
+  (** Through that identification, [cxfib] of the extracted sequence is the inverse of [pfiber2_loops psi], modulo the loop identification of [K(A,3)]. *)
+  Local Definition phomotopy_cxfib_pfiber2_loops
     : pequiv_pfiber (pequiv_em_connected_truncated (pfiber psi) 2)
         pequiv_pmap_idmap square_em_proj_pfib
       o* pequiv_cxfib (i := fmap (K' 3) (inclusion (abses_pfiber 1 psi)))
            (f := fmap (K' 3) (projection (abses_pfiber 1 psi)))
-      ==* (connect_fiberseq (pfib psi) psi).2 o* pequiv_loops_em_em A 3.
+      ==* (pfiber2_loops psi)^-1* o* pequiv_loops_em_em A 3.
   Proof.
-    (* The two sides have the same composite with [pfib (pfib psi)]: on the left the [pequiv_pfiber] square and [pfib_cxfib] turn it into [fmap (K' 3)] of the inclusion followed by the identification, and on the right it is the connecting map by definition. *)
+    (* The two sides have the same composite with [pfib (pfib psi)]: on the left the [pequiv_pfiber] square and [pfib_cxfib] turn it into [fmap (K' 3)] of the inclusion followed by the identification, and on the right it is the connecting map by [connecting_map_pfib]. *)
     rapply (phomotopy_pmap_isembedding_pi 2 (pfib (pfib psi))
       isembedding_pi_pfib_pfib).
     lhs_V' napply pmap_compose_assoc.
@@ -252,19 +252,8 @@ Section PfiberDeloop.
     lhs' napply pmap_compose_assoc.
     lhs' napply (pmap_postwhisker _ (pfib_cxfib _)).
     rhs_V' napply pmap_compose_assoc.
+    rhs_V' napply (pmap_prewhisker _ (connecting_map_pfib psi)).
     exact phomotopy_em_incl_connecting_map.
-  Qed.
-
-  (** The connecting identification of [psi] inverts [pfiber2_loops], since the underlying [pequiv_pfiber] square is tautological. *)
-  Local Definition pfiber2_loops_connect
-    : pfiber2_loops psi o* ((connect_fiberseq (pfib psi) psi).2)
-      ==* pmap_idmap.
-  Proof.
-    refine (pmap_prewhisker _ _ @* peisretr
-      ((pfiber2_loops psi)
-       o*E (pequiv_pfiber _ _ (square_pfib_pequiv_cxfib (pfib psi) psi)))).
-    exact (pmap_postwhisker _ (pequiv_pfiber_cxfib_taut psi)
-           @* pmap_precompose_idmap _)^*.
   Qed.
 
   (** Through the loop identification of [K(A,3)], the connecting map of the extracted fiber sequence is [loops psi], twisted by loop inversion. *)
@@ -274,24 +263,17 @@ Section PfiberDeloop.
            (fmap (K' 3) (projection (abses_pfiber 1 psi)))
       ==* fmap loops psi o* loops_inv K(B, 3).
   Proof.
-    (* Insert the identity [pfiber2_loops psi o* connect] in front. *)
-    lhs_V' napply pmap_postcompose_idmap.
-    lhs' napply (pmap_prewhisker _ pfiber2_loops_connect^*).
-    (* Reassociate to expose the connecting composite, then the cxfib square. *)
-    lhs' napply pmap_compose_assoc.
-    lhs' napply (pmap_postwhisker _ (pmap_compose_assoc _ _ _)^*).
-    lhs' napply (pmap_postwhisker _
-      (pmap_prewhisker _ phomotopy_cxfib_connect^*)).
+    (* By [connecting_map_pfib2], it suffices to compare with the connecting map of the fiber sequence of [pfib psi]. *)
+    rhs_V' napply (connecting_map_pfib2 psi).
+    napply moveL_pequiv_Mf.
+    lhs_V' napply pmap_compose_assoc.
+    lhs_V' napply (pmap_prewhisker _ phomotopy_cxfib_pfiber2_loops).
     (* Compare the connecting maps across the identification. *)
-    lhs' napply (pmap_postwhisker _ (pmap_compose_assoc _ _ _)).
-    lhs' napply (pmap_postwhisker _
-      (pmap_postwhisker _ (connecting_map_cxfib _ _))).
-    lhs' napply (pmap_postwhisker _
-      (connecting_map_natural _ _ square_em_proj_pfib)).
-    lhs' tapply (pmap_postwhisker _
-      (pmap_postwhisker _ (fmap_id loops _)
-       @* pmap_precompose_idmap _)).
-    exact (connecting_map_pfib2 psi).
+    lhs' napply pmap_compose_assoc.
+    lhs' napply (pmap_postwhisker _ (connecting_map_cxfib _ _)).
+    lhs' napply (connecting_map_natural _ _ square_em_proj_pfib).
+    lhs' tapply (pmap_postwhisker _ (fmap_id loops _)).
+    napply pmap_precompose_idmap.
   Qed.
 
   (** Negation on [K(B,2)], as loop inversion conjugated by the loop identification.  It should agree with [fmap (K' 2) ab_homo_negation], since both act by inversion on [Pi 2], but we do not need that here. *)
