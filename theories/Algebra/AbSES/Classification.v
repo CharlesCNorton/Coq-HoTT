@@ -235,22 +235,24 @@ Section PfiberDeloop.
     rapply isexact_pi_fiber.
   Defined.
 
-  (** Through that identification, [cxfib] of the extracted sequence is the inverse of [pfiber2_loops psi], modulo the loop identification of [K(A,3)]. *)
+  (** The identifications above form a map from the fiber sequence of Eilenberg-Mac Lane spaces of the extracted sequence to the fiber sequence of [pfib psi]: on fibers, the map induced by [square_em_proj_pfib] corresponds to the inverse of [pfiber2_loops psi], modulo the loop identification of [K(A,3)]. *)
   Local Definition phomotopy_cxfib_pfiber2_loops
-    : pequiv_pfiber (pequiv_em_connected_truncated (pfiber psi) 2)
-        pequiv_pmap_idmap square_em_proj_pfib
+    : functor_pfiber square_em_proj_pfib
       o* pequiv_cxfib (i := fmap (K' 3) (inclusion (abses_pfiber 1 psi)))
            (f := fmap (K' 3) (projection (abses_pfiber 1 psi)))
-      ==* (pfiber2_loops psi)^-1* o* pequiv_loops_em_em A 3.
+      ==* pequiv_cxfib (i := pfib (pfib psi)) (f := pfib psi)
+          o* ((pfiber2_loops psi)^-1* o* pequiv_loops_em_em A 3).
   Proof.
-    (* The two sides have the same composite with [pfib (pfib psi)]: on the left the [pequiv_pfiber] square and [pfib_cxfib] turn it into [fmap (K' 3)] of the inclusion followed by the identification, and on the right it is the connecting map by [connecting_map_pfib]. *)
+    (* The two sides have the same composite with [pfib (pfib psi)]: on the left the [functor_pfiber] square and [pfib_cxfib] turn it into [fmap (K' 3)] of the inclusion followed by the identification, and on the right [pfib_cxfib] and [connecting_map_pfib] turn it into the connecting map. *)
     rapply (phomotopy_pmap_isembedding_pi 2 (pfib (pfib psi))
       isembedding_pi_pfib_pfib).
     lhs_V' napply pmap_compose_assoc.
     lhs_V' napply (pmap_prewhisker _
-      (square_pequiv_pfiber _ _ square_em_proj_pfib)).
+      (square_functor_pfiber square_em_proj_pfib)).
     lhs' napply pmap_compose_assoc.
     lhs' napply (pmap_postwhisker _ (pfib_cxfib _)).
+    rhs_V' napply pmap_compose_assoc.
+    rhs' napply (pmap_prewhisker _ (pfib_cxfib _)).
     rhs_V' napply pmap_compose_assoc.
     rhs_V' napply (pmap_prewhisker _ (connecting_map_pfib psi)).
     exact phomotopy_em_incl_connecting_map.
@@ -263,15 +265,12 @@ Section PfiberDeloop.
            (fmap (K' 3) (projection (abses_pfiber 1 psi)))
       ==* fmap loops psi o* loops_inv K(B, 3).
   Proof.
-    (* By [connecting_map_pfib2], it suffices to compare with the connecting map of the fiber sequence of [pfib psi]. *)
+    (* By [connecting_map_pfib2], it suffices to compare with the connecting map of the fiber sequence of [pfib psi], which we do by naturality. *)
     rhs_V' napply (connecting_map_pfib2 psi).
     napply moveL_pequiv_Mf.
     lhs_V' napply pmap_compose_assoc.
-    lhs_V' napply (pmap_prewhisker _ phomotopy_cxfib_pfiber2_loops).
-    (* Compare the connecting maps across the identification. *)
-    lhs' napply pmap_compose_assoc.
-    lhs' napply (pmap_postwhisker _ (connecting_map_cxfib _ _)).
-    lhs' napply (connecting_map_natural _ _ square_em_proj_pfib).
+    lhs' napply (connecting_map_natural_isexact
+                   phomotopy_cxfib_pfiber2_loops).
     lhs' tapply (pmap_postwhisker _ (fmap_id loops _)).
     napply pmap_precompose_idmap.
   Qed.
@@ -535,41 +534,14 @@ Section Naturality.
     napply em_incl_square.
   Qed.
 
-  (** Hence the connecting maps of the two sequences are related by the morphism, through the loop identification of the bases. *)
-  Local Definition cm_natural
-    : fmap (K' 3) (component1 phi)
-      o* connecting_map (fmap (K' 3) (inclusion E)) (fmap (K' 3) (projection E))
-      ==* connecting_map (fmap (K' 3) (inclusion F)) (fmap (K' 3) (projection F))
-          o* fmap loops (fmap (K' 3) (component3 phi)).
-  Proof.
-    lhs_V' tapply (pmap_prewhisker _
-      (moveR_pequiv_Vf em_cxfib_F (fmap (K' 3) (component1 phi))
-        (functor_pfiber (em_proj_square^*) o* em_cxfib_E)
-        em_cxfib_square)).
-    lhs' napply pmap_compose_assoc.
-    lhs' napply (pmap_postwhisker _ (pmap_compose_assoc _ _ _)).
-    lhs' tapply (pmap_postwhisker _ (pmap_postwhisker _
-      (connecting_map_cxfib (fmap (K' 3) (inclusion E))
-        (fmap (K' 3) (projection E))))).
-    lhs' napply (pmap_postwhisker _
-      (connecting_map_natural_functor (em_proj_square^*))).
-    lhs_V' napply pmap_compose_assoc.
-    napply pmap_prewhisker.
-    exact (moveR_pequiv_Vf em_cxfib_F
-      (connecting_map (fmap (K' 3) (inclusion F)) (fmap (K' 3) (projection F)))
-      (connecting_map (pfib (fmap (K' 3) (projection F)))
-        (fmap (K' 3) (projection F)))
-      (connecting_map_cxfib (fmap (K' 3) (inclusion F))
-        (fmap (K' 3) (projection F)))^* ).
-  Qed.
-
-  (** A morphism of short exact sequences induces a commuting square of classifying maps. *)
+  (** A morphism of short exact sequences induces a commuting square of classifying maps, by naturality of the connecting map and of the loop identification. *)
   Definition abses_classifying_map_natural
     : fmap (K' 3) (component1 phi) o* abses_classifying_map E
       ==* abses_classifying_map F o* fmap (K' 2) (component3 phi).
   Proof.
     lhs_V' napply pmap_compose_assoc.
-    lhs' napply (pmap_prewhisker _ cm_natural).
+    lhs' napply (pmap_prewhisker _
+      (connecting_map_natural_isexact em_cxfib_square)).
     lhs' napply pmap_compose_assoc.
     lhs' napply (pmap_postwhisker _ (em_fmap_loops_natural (component3 phi) 2)).
     exact (pmap_compose_assoc _ _ _)^*.

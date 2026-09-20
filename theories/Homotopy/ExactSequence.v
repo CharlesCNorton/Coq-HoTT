@@ -528,7 +528,7 @@ Proof.
          @* pmap_precompose_idmap _).
 Defined.
 
-(** TODO: The next two results are proved for the tautological fiber sequence.  It would be nice to extend them to any [FiberSeq] or equivalently any purely-exact sequence. *)
+(** The next two results are proved for the tautological fiber sequence.  They are extended to any purely exact sequence in [connecting_map_natural_isexact] below. *)
 
 (** The connecting map of the tautological fiber sequence is natural in arbitrary squares of pointed maps. *)
 Definition connecting_map_natural_functor {X Y X' Y' : pType}
@@ -573,6 +573,24 @@ Proof.
   napply moveR_pequiv_fV.
   napply moveL_pequiv_Vf.
   reflexivity.
+Defined.
+
+(** The connecting map is natural with respect to maps of purely exact sequences.  Such a map consists of pointed maps [g], [h] and [k], a square [q], and a homotopy [c] saying that the map induced by [q] on fibers corresponds to [g] under the identifications [pequiv_cxfib].  The other square, [h o* i' ==* i o* g], follows from [c]. *)
+Definition connecting_map_natural_isexact {F X Y F' X' Y' : pType}
+  {i : F ->* X} {f : X ->* Y} `{IsExact purely F X Y i f}
+  {i' : F' ->* X'} {f' : X' ->* Y'} `{IsExact purely F' X' Y' i' f'}
+  {g : F' ->* F} {h : X' ->* X} {k : Y' ->* Y} {q : k o* f' ==* f o* h}
+  (c : functor_pfiber q o* pequiv_cxfib ==* pequiv_cxfib o* g)
+  : g o* connecting_map i' f' ==* connecting_map i f o* fmap loops k.
+Proof.
+  tapply (cate_monic_equiv (A:=pType) (pequiv_cxfib (i:=i) (f:=f))).
+  lhs_V' napply pmap_compose_assoc.
+  lhs_V' napply (pmap_prewhisker _ c).
+  lhs' napply pmap_compose_assoc.
+  lhs' napply (pmap_postwhisker _ (connecting_map_cxfib i' f')).
+  lhs' napply (connecting_map_natural_functor q).
+  rhs_V' napply pmap_compose_assoc.
+  exact (pmap_prewhisker _ (connecting_map_cxfib i f))^*.
 Defined.
 
 (** Through [pfiber2_loops], the connecting map of the doubly-iterated tautological fiber sequence is loop inversion followed by [loops] of the map. *)
