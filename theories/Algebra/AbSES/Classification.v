@@ -80,11 +80,11 @@ Section AbSESPfiber.
     := grp_homo_compose (grp_iso_inverse (equiv_g_pi_n_em B n.+1))
          (fmap (Pi n.+2) (pfib f)).
 
-  (** The two homotopy groups neighbouring the sequence vanish. *)
-  Local Instance contr_pi_em : Contr (Pi n.+2 K(A, n.+3))
+  (** The two homotopy groups neighbouring the sequence vanish: [Pi n.+2 K(A, n.+3)] lies below the connectivity of [K(A, n.+3)], and [Pi n.+3 K(B, n.+2)] lies above the truncation level of [K(B, n.+2)]. *)
+  Local Instance contr_pi_em_below : Contr (Pi n.+2 K(A, n.+3))
     := contr_pi_isconnected n.+2 K(A, n.+3).
 
-  Local Instance contr_pi_em' : Contr (Pi n.+3 K(B, n.+2))
+  Local Instance contr_pi_em_above : Contr (Pi n.+3 K(B, n.+2))
     := contr_pi_istrunc n.+2 K(B, n.+2).
 
   (** The three conditions defining a short exact sequence therefore come from the long exact sequences of the fiber sequence of [f] and of its rotation. *)
